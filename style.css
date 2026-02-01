@@ -1,0 +1,15 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+  }
+  
+  #loading {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 18px;
+  }
+  
