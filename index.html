@@ -1,22 +1,47 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AR Nail Art Hand Tracking</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<title>AR Nail Art</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+}
+#startBtn {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 15px 25px;
+  font-size: 18px;
+  background: pink;
+  border: none;
+  border-radius: 8px;
+  z-index: 10;
+}
+video {
+  display: none;
+}
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+</style>
 </head>
 
 <body>
 
-<h2>AR Nail Art – Hand Tracking</h2>
-<button onclick="startAR()">Start AR Nail Art</button>
+<button id="startBtn">Start AR Nail Art</button>
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>
