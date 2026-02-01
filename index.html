@@ -1,22 +1,48 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Nail Art AR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Nail Art AR</title>
 
-  <!-- MindAR -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-hand-three.prod.js"></script>
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- MindAR Face -->
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
 
-  <link rel="stylesheet" href="style.css">
-</head>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
 
-<body>
-  <div id="loading">Loading AR...</div>
-  <script src="script.js"></script>
-</body>
+  <body>
+    <a-scene
+      mindar-face
+      embedded
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: true"
+    >
+      <a-assets>
+        <a-asset-item
+          id="nailModel"
+          src="model/modelcreampita.glb"
+        ></a-asset-item>
+      </a-assets>
+
+      <!-- Kamera -->
+      <a-camera position="0 0 0"></a-camera>
+
+      <!-- Nail Art (sementara di depan wajah dulu, BIAR KELIHATAN) -->
+      <a-entity
+        gltf-model="#nailModel"
+        position="0 0 -0.5"
+        scale="0.02 0.02 0.02"
+      ></a-entity>
+    </a-scene>
+  </body>
 </html>
