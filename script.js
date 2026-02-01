@@ -37,8 +37,11 @@ function startAR() {
 }
 
 function onResults(results) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // 1️⃣ gambar kamera ke canvas
+  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+  // 2️⃣ baru gambar AR di atasnya
   if (!results.multiHandLandmarks) return;
 
   for (const landmarks of results.multiHandLandmarks) {
@@ -53,3 +56,5 @@ function onResults(results) {
     ctx.fill();
   }
 }
+
+
