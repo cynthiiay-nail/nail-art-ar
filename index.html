@@ -1,32 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>AR Nail Art - Hand Tracking</title>
+<meta charset="UTF-8" />
+<title>AR Nail Art - Hand Tracking</title>
 
-  <!-- MediaPipe Hands -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<!-- MediaPipe Hands -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
+<!-- Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
 
-  <style>
-    body { margin: 0; overflow: hidden; }
-    video { display: none; }
-    canvas { position: absolute; top: 0; left: 0; }
-  </style>
+<style>
+body { margin:0; overflow:hidden; background:black; }
+#startBtn {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 16px 24px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  background: #ff69b4;
+  color: white;
+  z-index: 10;
+}
+video { display:none; }
+</style>
 </head>
 
 <body>
 
+<button id="startBtn">Start AR Nail Art</button>
 <video id="video" autoplay playsinline></video>
 
 <script>
-/* =======================
-   THREE.JS SCENE
-======================= */
+/* =====================
+   THREE.JS
+===================== */
 const scene = new THREE.Scene();
 const camera3D = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera3D.position.z = 2;
@@ -35,10 +48,8 @@ const renderer = new THREE.WebGLRenderer({ alpha:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Light
 scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-// Load nail model
 let nail;
 const loader = new THREE.GLTFLoader();
 loader.load("model/modelcreampita.glb", gltf => {
@@ -47,9 +58,9 @@ loader.load("model/modelcreampita.glb", gltf => {
   scene.add(nail);
 });
 
-/* =======================
+/* =====================
    MEDIAPIPE HANDS
-======================= */
+===================== */
 const hands = new Hands({
   locateFile: file =>
     `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -65,31 +76,31 @@ hands.setOptions({
 hands.onResults(results => {
   if (!results.multiHandLandmarks || !nail) return;
 
-  // 👉 Landmark 8 = ujung telunjuk
-  const finger = results.multiHandLandmarks[0][8];
+  const finger = results.multiHandLandmarks[0][8]; // telunjuk
 
-  // Convert ke koordinat layar (-1 sampai 1)
   nail.position.x = (finger.x - 0.5) * 2;
   nail.position.y = -(finger.y - 0.5) * 2;
 });
 
-/* =======================
-   CAMERA START
-======================= */
+/* =====================
+   START CAMERA (USER TAP)
+===================== */
 const videoElement = document.getElementById("video");
+const startBtn = document.getElementById("startBtn");
 
-const cam = new Camera(videoElement, {
-  onFrame: async () => {
-    await hands.send({ image: videoElement });
-    renderer.render(scene, camera3D);
-  },
-  facingMode: "environment", // kamera belakang
-  width: 1280,
-  height: 720
-});
+startBtn.onclick = () => {
+  startBtn.style.display = "none";
 
-cam.start();
+  const cam = new Camera(videoElement, {
+    onFrame: async () => {
+      await hands.send({ image: videoElement });
+      renderer.render(scene, camera3D);
+    },
+    facingMode: "environment",
+    width: 1280,
+    height: 720
+  });
+
+  cam.start();
+};
 </script>
-
-</body>
-</html>
