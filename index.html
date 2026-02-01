@@ -1,47 +1,95 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>AR Nail Art</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AR Nail Art - Hand Tracking</title>
 
-    <!-- A-Frame -->
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <!-- MediaPipe Hands -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
-    <!-- MediaPipe Hands -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
 
-    <!-- MindAR (Image Target, dipakai buat WebAR base) -->
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    video { display: none; }
+    canvas { position: absolute; top: 0; left: 0; }
+  </style>
+</head>
 
-    <style>
-      body { margin: 0; overflow: hidden; }
-    </style>
-  </head>
+<body>
 
-  <body>
-    <a-scene
-      embedded
-      renderer="colorManagement: true"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: true"
-    >
+<video id="video" autoplay playsinline></video>
 
-      <a-assets>
-        <a-asset-item id="nail" src="model/modelcreampita.glb"></a-asset-item>
-      </a-assets>
+<script>
+/* =======================
+   THREE.JS SCENE
+======================= */
+const scene = new THREE.Scene();
+const camera3D = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
+camera3D.position.z = 2;
 
-      <!-- Kamera belakang -->
-      <a-camera position="0 0 0"></a-camera>
+const renderer = new THREE.WebGLRenderer({ alpha:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-      <!-- Nail Art (sementara FIX di layar, next step kita ikat ke jari) -->
-      <a-entity
-        gltf-model="#nail"
-        position="0 0 -0.5"
-        scale="0.05 0.05 0.05"
-        rotation="0 180 0"
-      ></a-entity>
+// Light
+scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-    </a-scene>
-  </body>
+// Load nail model
+let nail;
+const loader = new THREE.GLTFLoader();
+loader.load("model/modelcreampita.glb", gltf => {
+  nail = gltf.scene;
+  nail.scale.set(0.15,0.15,0.15);
+  scene.add(nail);
+});
+
+/* =======================
+   MEDIAPIPE HANDS
+======================= */
+const hands = new Hands({
+  locateFile: file =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+});
+
+hands.setOptions({
+  maxNumHands: 1,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.7
+});
+
+hands.onResults(results => {
+  if (!results.multiHandLandmarks || !nail) return;
+
+  // 👉 Landmark 8 = ujung telunjuk
+  const finger = results.multiHandLandmarks[0][8];
+
+  // Convert ke koordinat layar (-1 sampai 1)
+  nail.position.x = (finger.x - 0.5) * 2;
+  nail.position.y = -(finger.y - 0.5) * 2;
+});
+
+/* =======================
+   CAMERA START
+======================= */
+const videoElement = document.getElementById("video");
+
+const cam = new Camera(videoElement, {
+  onFrame: async () => {
+    await hands.send({ image: videoElement });
+    renderer.render(scene, camera3D);
+  },
+  facingMode: "environment", // kamera belakang
+  width: 1280,
+  height: 720
+});
+
+cam.start();
+</script>
+
+</body>
 </html>
