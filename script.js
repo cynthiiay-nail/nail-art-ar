@@ -1,91 +1,104 @@
 const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
 const startBtn = document.getElementById("startBtn");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+let scene, camera3D, renderer;
+let nailModel = null;
 
-startBtn.addEventListener("click", startAR);
+// ======================
+// THREE.JS SETUP
+// ======================
+scene = new THREE.Scene();
 
-function startAR() {
+camera3D = new THREE.PerspectiveCamera(
+  70,
+  window.innerWidth / window.innerHeight,
+  0.01,
+  10
+);
+camera3D.position.z = 1;
+
+renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Light
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(0, 1, 1);
+scene.add(light);
+
+// ======================
+// LOAD GLB MODEL
+// ======================
+const loader = new THREE.GLTFLoader();
+loader.load(
+  "model/modelcreampita.glb",
+  (gltf) => {
+    nailModel = gltf.scene;
+    nailModel.scale.set(0.01, 0.01, 0.01);
+    scene.add(nailModel);
+  },
+  undefined,
+  (error) => {
+    console.error("GLB error", error);
+  }
+);
+
+// ======================
+// START BUTTON
+// ======================
+startBtn.onclick = () => {
   startBtn.style.display = "none";
+  startAR();
+};
 
+// ======================
+// MEDIAPIPE
+// ======================
+function startAR() {
   const hands = new Hands({
-    locateFile: file =>
+    locateFile: (file) =>
       `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
   });
 
   hands.setOptions({
     maxNumHands: 1,
     modelComplexity: 1,
-    minDetectionConfidence: 0.7,
-    minTrackingConfidence: 0.7,
+    minDetectionConfidence: 0.8,
+    minTrackingConfidence: 0.8,
   });
 
   hands.onResults(onResults);
 
   const camera = new Camera(video, {
-  onFrame: async () => {
-    await hands.send({ image: video });
-  },
-  width: 1280,
-  height: 720,
-  facingMode: { ideal: "environment" }
-});
+    onFrame: async () => {
+      await hands.send({ image: video });
+    },
+    width: 1280,
+    height: 720,
+    facingMode: "environment", // KAMERA BELAKANG
+  });
 
   camera.start();
 }
 
+// ======================
+// HAND TRACKING RESULT
+// ======================
 function onResults(results) {
-
-  ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-
   if (!results.multiHandLandmarks) return;
+  if (!nailModel) return;
 
-  // pasangan DIP → TIP
-  const fingers = [
-    { dip: 3, tip: 4 },   // jempol
-    { dip: 7, tip: 8 },   // telunjuk
-    { dip: 11, tip: 12 }, // tengah
-    { dip: 15, tip: 16 }, // manis
-    { dip: 19, tip: 20 }  // kelingking
-  ];
+  const landmarks = results.multiHandLandmarks[0];
+  const center = landmarks[9]; // tengah telapak
 
-  for (const landmarks of results.multiHandLandmarks) {
+  // POSISI
+  nailModel.position.x = (center.x - 0.5) * 2;
+  nailModel.position.y = -(center.y - 0.5) * 2;
+  nailModel.position.z = -center.z;
 
-    fingers.forEach(f => {
-      const dip = landmarks[f.dip];
-      const tip = landmarks[f.tip];
+  // ROTASI (WAJAR)
+  nailModel.rotation.x = Math.PI / 2;
+  nailModel.rotation.y = Math.PI;
 
-      // posisi tengah antara DIP & TIP (posisi kuku)
-      const x = (dip.x * 0.6 + tip.x * 0.4) * canvas.width;
-      const y = (dip.y * 0.6 + tip.y * 0.4) * canvas.height;
-
-      // hitung arah jari
-      const angle = Math.atan2(
-        tip.y - dip.y,
-        tip.x - dip.x
-      );
-
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-
-      // gambar kuku
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 20, 12, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "hotpink";
-      ctx.fill();
-
-      ctx.restore();
-    });
-  }
+  renderer.render(scene, camera3D);
 }
-
-
-
-
-
-
-
