@@ -26,12 +26,13 @@ function startAR() {
   hands.onResults(onResults);
 
   const camera = new Camera(video, {
-    onFrame: async () => {
-      await hands.send({ image: video });
-    },
-    width: 1280,
-    height: 720,
-  });
+  onFrame: async () => {
+    await hands.send({ image: video });
+  },
+  width: 1280,
+  height: 720,
+  facingMode: { ideal: "environment" }
+});
 
   camera.start();
 }
@@ -56,5 +57,6 @@ function onResults(results) {
     ctx.fill();
   }
 }
+
 
 
