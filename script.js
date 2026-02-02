@@ -39,24 +39,31 @@ function startAR() {
 
 function onResults(results) {
 
-  // 1️⃣ gambar kamera ke canvas
+  // tampilkan kamera
   ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-  // 2️⃣ baru gambar AR di atasnya
   if (!results.multiHandLandmarks) return;
 
+  const fingerTips = [4, 8, 12, 16, 20];
+
   for (const landmarks of results.multiHandLandmarks) {
-    const finger = landmarks[8]; // ujung telunjuk
 
-    const x = finger.x * canvas.width;
-    const y = finger.y * canvas.height;
+    fingerTips.forEach(index => {
+      const finger = landmarks[index];
 
-    ctx.beginPath();
-    ctx.arc(x, y, 15, 0, Math.PI * 2);
-    ctx.fillStyle = "hotpink";
-    ctx.fill();
+      const x = finger.x * canvas.width;
+      const y = finger.y * canvas.height;
+
+      // simulasi KUKU
+      ctx.beginPath();
+      ctx.ellipse(x, y, 18, 12, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "hotpink";
+      ctx.fill();
+    });
   }
 }
+
+
 
 
 
