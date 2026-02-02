@@ -1,46 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="UTF-8" />
-<title>AR Nail Art</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-
-<style>
-body {
-  margin: 0;
-  overflow: hidden;
-}
-#startBtn {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 15px 25px;
-  font-size: 18px;
-  background: pink;
-  border: none;
-  border-radius: 8px;
-  z-index: 10;
-}
-video {
-  display: none;
-}
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-</style>
+  <meta charset="UTF-8" />
+  <title>AR Nail Art</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+    }
+    #startBtn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: pink;
+      font-weight: bold;
+    }
+    video {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
 
-<button id="startBtn">Start AR Nail Art</button>
+<button id="startBtn">START AR NAIL ART</button>
 
 <video id="video" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
+
+<!-- Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
+
+<!-- MediaPipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
 <script src="script.js"></script>
 </body>
