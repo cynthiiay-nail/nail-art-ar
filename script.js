@@ -39,29 +39,51 @@ function startAR() {
 
 function onResults(results) {
 
-  // tampilkan kamera
   ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
   if (!results.multiHandLandmarks) return;
 
-  const fingerTips = [4, 8, 12, 16, 20];
+  // pasangan DIP → TIP
+  const fingers = [
+    { dip: 3, tip: 4 },   // jempol
+    { dip: 7, tip: 8 },   // telunjuk
+    { dip: 11, tip: 12 }, // tengah
+    { dip: 15, tip: 16 }, // manis
+    { dip: 19, tip: 20 }  // kelingking
+  ];
 
   for (const landmarks of results.multiHandLandmarks) {
 
-    fingerTips.forEach(index => {
-      const finger = landmarks[index];
+    fingers.forEach(f => {
+      const dip = landmarks[f.dip];
+      const tip = landmarks[f.tip];
 
-      const x = finger.x * canvas.width;
-      const y = finger.y * canvas.height;
+      // posisi tengah antara DIP & TIP (posisi kuku)
+      const x = (dip.x * 0.6 + tip.x * 0.4) * canvas.width;
+      const y = (dip.y * 0.6 + tip.y * 0.4) * canvas.height;
 
-      // simulasi KUKU
+      // hitung arah jari
+      const angle = Math.atan2(
+        tip.y - dip.y,
+        tip.x - dip.x
+      );
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      // gambar kuku
       ctx.beginPath();
-      ctx.ellipse(x, y, 18, 12, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 20, 12, 0, 0, Math.PI * 2);
       ctx.fillStyle = "hotpink";
       ctx.fill();
+
+      ctx.restore();
     });
   }
 }
+
+
 
 
 
