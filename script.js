@@ -46,10 +46,11 @@ loader.load(
 // ======================
 // START BUTTON
 // ======================
-startBtn.onclick = () => {
+startBtn.addEventListener("click", () => {
   startBtn.style.display = "none";
   startAR();
-};
+});
+
 
 // ======================
 // MEDIAPIPE
@@ -102,3 +103,4 @@ function onResults(results) {
 
   renderer.render(scene, camera3D);
 }
+
