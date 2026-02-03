@@ -69,15 +69,26 @@ const camera = new Camera(video, {
 
 // HAND RESULT
 function onResults(results) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   if (!results.multiHandLandmarks) return;
-  if (!nailModel) return;
 
-  const center = results.multiHandLandmarks[0][9];
+  for (const landmarks of results.multiHandLandmarks) {
 
-  nailModel.position.x = (center.x - 0.5) * 2;
-  nailModel.position.y = -(center.y - 0.5) * 2;
-  nailModel.position.z = -center.z;
+    const nailTips = [4, 8, 12, 16, 20];
 
-  renderer.render(scene, camera3D);
+    nailTips.forEach((i) => {
+      const finger = landmarks[i];
+
+      const x = finger.x * canvas.width;
+      const y = finger.y * canvas.height;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 14, 0, 2 * Math.PI);
+      ctx.fillStyle = "pink";
+      ctx.fill();
+    });
+  }
 }
+
 
