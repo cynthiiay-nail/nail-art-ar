@@ -20,6 +20,11 @@ camera3D.position.z = 1;
 renderer = new THREE.WebGLRenderer({ alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+renderer.domElement.style.position = "fixed";
+renderer.domElement.style.top = "0";
+renderer.domElement.style.left = "0";
+renderer.domElement.style.zIndex = "1";
+
 
 // Light
 const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -103,4 +108,5 @@ function onResults(results) {
 
   renderer.render(scene, camera3D);
 }
+
 
