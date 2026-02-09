@@ -1,24 +1,12 @@
-body {
-  margin: 0;
-  overflow: hidden;
-}
-
-video {
+#three-container canvas {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
   z-index: 1;
+  pointer-events: none; /* 🔥 INI KUNCINYA */
 }
 
-#three-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2;
-  pointer-events: none;
+#startBtn {
+  position: relative;
+  z-index: 10;
 }
