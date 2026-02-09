@@ -9,9 +9,9 @@ const camera3D = new THREE.PerspectiveCamera(
   60,
   window.innerWidth / window.innerHeight,
   0.01,
-  10
+  100
 );
-camera3D.position.z = 1;
+camera3D.position.z = 3;
 
 const renderer = new THREE.WebGLRenderer({
   alpha: true,
@@ -39,20 +39,22 @@ scene.add(debugCube);
 const nails = {};
 const loader = new THREE.GLTFLoader();
 
-loader.load("model/modelcreampitablend2.glb", (gltf) => {
-  console.log("MODEL LOADED");
+loader.load("./model/modelcreampitablend2.glb", (gltf) => {
+  const model = gltf.scene;
 
-  gltf.scene.traverse((child) => {
-    if (child.isMesh) {
-      console.log("MESH:", child.name);
-
-      child.scale.set(0.3, 0.3, 0.3);
-      child.position.set(0, 0, -0.5);
-      child.visible = true; // 🔥 PAKSA MUNCUL
-
-      scene.add(child);
+  model.traverse((c) => {
+    if (c.isMesh) {
+      c.material.side = THREE.DoubleSide;
     }
   });
+
+  model.scale.set(1, 1, 1);     // jangan kecil dulu
+  model.position.set(0, 0, -1); // 🔥 agak menjauh
+  model.rotation.set(0, 0, 0);
+
+  scene.add(model);
+});
+
 });
 
 
@@ -127,4 +129,5 @@ function animate() {
   renderer.render(scene, camera3D);
 }
 animate();
+
 
