@@ -1,67 +1,63 @@
 const video = document.getElementById("video");
 const startBtn = document.getElementById("startBtn");
+const container = document.getElementById("three-container");
 
-let scene, camera3D, renderer;
-let nailModel = null;
+// ===== THREE.JS SETUP =====
+const scene = new THREE.Scene();
 
-// THREE SETUP
-scene = new THREE.Scene();
-
-camera3D = new THREE.PerspectiveCamera(
-  70,
+const camera3D = new THREE.PerspectiveCamera(
+  60,
   window.innerWidth / window.innerHeight,
   0.01,
   10
 );
 camera3D.position.z = 1;
 
-renderer = new THREE.WebGLRenderer({
+const renderer = new THREE.WebGLRenderer({
   alpha: true,
   antialias: true
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-document.body.appendChild(renderer.domElement);
-
-camera3D = new THREE.PerspectiveCamera(
-  45,
-  window.innerWidth / window.innerHeight,
-  0.01,
-  100
-);
-camera3D.position.z = 1;
-
-Object.values(nails).forEach(nail => {
-  nail.scale.set(0.15, 0.15, 0.15);
-});
+container.appendChild(renderer.domElement);
 
 // LIGHT
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 1, 1);
 scene.add(light);
 
-const loader = new THREE.GLTFLoader();
+// ===== DEBUG CUBE (WAJIB KELIHATAN) =====
+const debugCube = new THREE.Mesh(
+  new THREE.BoxGeometry(0.3, 0.3, 0.3),
+  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+);
+debugCube.position.z = -0.5;
+scene.add(debugCube);
 
-const nails = {}; // simpan kuku per jari
+// ===== LOAD MODEL =====
+const nails = {};
+const loader = new THREE.GLTFLoader();
 
 loader.load("model/modelcreampitablend2.glb", (gltf) => {
   gltf.scene.traverse((child) => {
     if (child.isMesh) {
+      child.scale.set(0.15, 0.15, 0.15);
+      child.visible = false;
       nails[child.name] = child;
-      child.visible = false; // tampilkan nanti saat tracking
       scene.add(child);
     }
   });
 });
 
+// ===== MEDIAPIPE =====
+const fingerMap = {
+  4: "nail_thumb",
+  8: "nail_index",
+  12: "nail_middle",
+  16: "nail_ring",
+  20: "nail_pinky",
+};
 
-// BUTTON
-startBtn.addEventListener("click", () => {
-  startBtn.style.display = "none";
-  startAR();
-});
-
-// MEDIAPIPE
 function startAR() {
   const hands = new Hands({
     locateFile: (file) =>
@@ -77,28 +73,24 @@ function startAR() {
 
   hands.onResults(onResults);
 
-const camera = new Camera(video, {
-  onFrame: async () => {
-    await hands.send({ image: video });
-  },
-  width: 1280,
-  height: 720,
-  facingMode: "environment" 
-});
-
+  const camera = new Camera(video, {
+    onFrame: async () => {
+      await hands.send({ image: video });
+    },
+    width: 1280,
+    height: 720,
+    facingMode: "environment",
+  });
 
   camera.start();
 }
 
-const fingerMap = {
-  4: "Nail_Thumb",
-  8: "Nail_Index",
-  12: "Nail_Middle",
-  16: "Nail_Ring",
-  20: "Nail_Pinky",
-};
+startBtn.addEventListener("click", () => {
+  startBtn.style.display = "none";
+  startAR();
+});
 
-
+// ===== HAND TRACKING =====
 function onResults(results) {
   if (!results.multiHandLandmarks) {
     Object.values(nails).forEach(n => n.visible = false);
@@ -110,10 +102,8 @@ function onResults(results) {
   Object.entries(fingerMap).forEach(([index, name]) => {
     const nail = nails[name];
     const lm = landmarks[index];
-
     if (!nail || !lm) return;
 
-    // konversi ke world space
     nail.position.set(
       (lm.x - 0.5) * 1.5,
       -(lm.y - 0.5) * 1.5,
@@ -124,21 +114,9 @@ function onResults(results) {
   });
 }
 
-
-
+// ===== RENDER LOOP =====
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera3D);
 }
 animate();
-
-const debugCube = new THREE.Mesh(
-  new THREE.BoxGeometry(0.1, 0.1, 0.1),
-  new THREE.MeshBasicMaterial({ color: 0xff00ff })
-);
-debugCube.position.z = -0.5;
-scene.add(debugCube);
-
-
-
-
