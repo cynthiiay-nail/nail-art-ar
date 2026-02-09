@@ -35,19 +35,26 @@ debugCube.position.z = -0.5;
 scene.add(debugCube);
 
 // ===== LOAD MODEL =====
+// ===== LOAD MODEL (DEBUG MODE) =====
 const nails = {};
 const loader = new THREE.GLTFLoader();
 
 loader.load("model/modelcreampitablend2.glb", (gltf) => {
+  console.log("MODEL LOADED");
+
   gltf.scene.traverse((child) => {
     if (child.isMesh) {
-      child.scale.set(0.15, 0.15, 0.15);
-      child.visible = false;
-      nails[child.name] = child;
+      console.log("MESH:", child.name);
+
+      child.scale.set(0.3, 0.3, 0.3);
+      child.position.set(0, 0, -0.5);
+      child.visible = true; // 🔥 PAKSA MUNCUL
+
       scene.add(child);
     }
   });
 });
+
 
 // ===== MEDIAPIPE =====
 const fingerMap = {
@@ -120,3 +127,4 @@ function animate() {
   renderer.render(scene, camera3D);
 }
 animate();
+
