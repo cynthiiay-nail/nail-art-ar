@@ -39,7 +39,7 @@ scene.add(debugCube);
 const nails = {};
 const loader = new THREE.GLTFLoader();
 
-loader.load("./model/modelcreampitablend2.glb", (gltf) => {
+loader.load("./model/modelcreampitablend3.glb", (gltf) => {
   const model = gltf.scene;
 
   model.traverse((c) => {
@@ -141,6 +141,7 @@ function animate() {
   renderer.render(scene, camera3D);
 }
 animate();
+
 
 
 
