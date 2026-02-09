@@ -48,6 +48,18 @@ loader.load("./model/modelcreampitablend2.glb", (gltf) => {
     }
   });
 
+  model.scale.set(1, 1, 1);
+  model.position.set(0, 0, -1);
+
+  // ⬇️ STEP 3: TAMBAH SALAH SATU SAJA
+  model.rotation.x = Math.PI / 2;
+  // ATAU kalau ini tidak kelihatan, GANTI dengan:
+  // model.rotation.x = -Math.PI / 2;
+
+  scene.add(model);
+});
+
+
   model.scale.set(1, 1, 1);     // jangan kecil dulu
   model.position.set(0, 0, -1); // 🔥 agak menjauh
   model.rotation.set(0, 0, 0);
@@ -129,5 +141,6 @@ function animate() {
   renderer.render(scene, camera3D);
 }
 animate();
+
 
 
