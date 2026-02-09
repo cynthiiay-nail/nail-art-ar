@@ -15,9 +15,25 @@ camera3D = new THREE.PerspectiveCamera(
 );
 camera3D.position.z = 1;
 
-renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer = new THREE.WebGLRenderer({
+  alpha: true,
+  antialias: true
+});
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
+
+camera3D = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.01,
+  100
+);
+camera3D.position.z = 1;
+
+Object.values(nails).forEach(nail => {
+  nail.scale.set(0.15, 0.15, 0.15);
+});
 
 // LIGHT
 const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -97,20 +113,32 @@ function onResults(results) {
 
     if (!nail || !lm) return;
 
-    // Konversi koordinat MediaPipe → Three.js
-    nail.position.x = (lm.x - 0.5) * 2;
-    nail.position.y = -(lm.y - 0.5) * 2;
-    nail.position.z = -lm.z;
+    // konversi ke world space
+    nail.position.set(
+      (lm.x - 0.5) * 1.5,
+      -(lm.y - 0.5) * 1.5,
+      -0.5
+    );
 
     nail.visible = true;
   });
 }
+
+
 
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera3D);
 }
 animate();
+
+const debugCube = new THREE.Mesh(
+  new THREE.BoxGeometry(0.1, 0.1, 0.1),
+  new THREE.MeshBasicMaterial({ color: 0xff00ff })
+);
+debugCube.position.z = -0.5;
+scene.add(debugCube);
+
 
 
 
