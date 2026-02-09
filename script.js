@@ -24,13 +24,20 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(0, 1, 1);
 scene.add(light);
 
-// LOAD MODEL
 const loader = new THREE.GLTFLoader();
-loader.load("model/modelcreampita.glb", (gltf) => {
-  nailModel = gltf.scene;
-  nailModel.scale.set(0.01, 0.01, 0.01);
-  scene.add(nailModel);
+
+const nails = {}; // simpan kuku per jari
+
+loader.load("model/modelcreampitablend2.glb", (gltf) => {
+  gltf.scene.traverse((child) => {
+    if (child.isMesh) {
+      nails[child.name] = child;
+      child.visible = false; // tampilkan nanti saat tracking
+      scene.add(child);
+    }
+  });
 });
+
 
 // BUTTON
 startBtn.addEventListener("click", () => {
@@ -67,28 +74,43 @@ const camera = new Camera(video, {
   camera.start();
 }
 
-// HAND RESULT
+const fingerMap = {
+  4: "Nail_Thumb",
+  8: "Nail_Index",
+  12: "Nail_Middle",
+  16: "Nail_Ring",
+  20: "Nail_Pinky",
+};
+
+
 function onResults(results) {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (!results.multiHandLandmarks) return;
-
-  for (const landmarks of results.multiHandLandmarks) {
-
-    const nailTips = [4, 8, 12, 16, 20];
-
-    nailTips.forEach((i) => {
-      const finger = landmarks[i];
-
-      const x = finger.x * canvas.width;
-      const y = finger.y * canvas.height;
-
-      ctx.beginPath();
-      ctx.arc(x, y, 14, 0, 2 * Math.PI);
-      ctx.fillStyle = "pink";
-      ctx.fill();
-    });
+  if (!results.multiHandLandmarks) {
+    Object.values(nails).forEach(n => n.visible = false);
+    return;
   }
+
+  const landmarks = results.multiHandLandmarks[0];
+
+  Object.entries(fingerMap).forEach(([index, name]) => {
+    const nail = nails[name];
+    const lm = landmarks[index];
+
+    if (!nail || !lm) return;
+
+    // Konversi koordinat MediaPipe → Three.js
+    nail.position.x = (lm.x - 0.5) * 2;
+    nail.position.y = -(lm.y - 0.5) * 2;
+    nail.position.z = -lm.z;
+
+    nail.visible = true;
+  });
 }
+
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera3D);
+}
+animate();
+
 
 
