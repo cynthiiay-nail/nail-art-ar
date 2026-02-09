@@ -52,7 +52,7 @@ loader.load("./model/modelcreampitablend3.glb", (gltf) => {
   model.position.set(0, 0, -1);
   // ATAU kalau ini tidak kelihatan, GANTI dengan:
   // model.rotation.x = -Math.PI / 2;
-
+ model.rotation.x = Math.PI / 2;
   scene.add(model);
 });
 
@@ -138,6 +138,7 @@ function animate() {
   renderer.render(scene, camera3D);
 }
 animate();
+
 
 
 
