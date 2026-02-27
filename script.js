@@ -36,12 +36,14 @@ function startHandTracking() {
   });
 
   const camera = new Camera(videoElement, {
-    onFrame: async () => {
-      await hands.send({ image: videoElement });
-    },
-    width: 640,
-    height: 480
-  });
+  onFrame: async () => {
+    await hands.send({ image: videoElement });
+  },
+  width: 640,
+  height: 480,
+  facingMode: "environment" // 🔥 pakai kamera belakang
+});
 
   camera.start();
 }
+
