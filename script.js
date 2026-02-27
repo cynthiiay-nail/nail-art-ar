@@ -25,10 +25,9 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-
 container.appendChild(renderer.domElement);
 
-// DEBUG CUBE (HARUS MUNCUL)
+// DEBUG CUBE
 const cube = new THREE.Mesh(
   new THREE.BoxGeometry(0.3, 0.3, 0.3),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
@@ -44,7 +43,7 @@ function animate() {
 animate();
 
 // ===============================
-// START BUTTON
+// BUTTON CLICK
 // ===============================
 startBtn.addEventListener("click", () => {
   startBtn.style.display = "none";
@@ -52,9 +51,10 @@ startBtn.addEventListener("click", () => {
 });
 
 // ===============================
-// MEDIAPIPE HANDS
+// MEDIAPIPE
 // ===============================
 function startAR() {
+
   const hands = new Hands({
     locateFile: (file) =>
       `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
@@ -63,22 +63,24 @@ function startAR() {
   hands.setOptions({
     maxNumHands: 1,
     modelComplexity: 1,
-    minDetectionConfidence: 0.7,
-    minTrackingConfidence: 0.7,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5,
   });
 
   hands.onResults((results) => {
-    if (results.multiHandLandmarks) {
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       console.log("HAND DETECTED");
     }
   });
 
   const camera = new Camera(video, {
     onFrame: async () => {
-      await hands.send({ image: video });
+      if (video.readyState >= 2) {
+        await hands.send({ image: video });
+      }
     },
-    width: 1280,
-    height: 720,
+    width: 640,
+    height: 480,
     facingMode: "environment",
   });
 
