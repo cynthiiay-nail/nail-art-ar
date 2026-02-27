@@ -4,19 +4,23 @@
 const videoElement = document.getElementById("video");
 const startBtn = document.getElementById("startBtn");
 
-// ===============================
-// BUTTON
-// ===============================
-startBtn.addEventListener("click", () => {
+startBtn.addEventListener("click", async () => {
   startBtn.style.display = "none";
-  startHandTracking();
+  await startHandTracking();
 });
 
-// ===============================
-// HAND TRACKING
-// ===============================
-function startHandTracking() {
+async function startHandTracking() {
 
+  // 1️⃣ Pakai getUserMedia langsung (lebih stabil di HP)
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" }
+  });
+
+  videoElement.srcObject = stream;
+
+  await videoElement.play();
+
+  // 2️⃣ Setup MediaPipe Hands
   const hands = new Hands({
     locateFile: (file) =>
       `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -30,20 +34,32 @@ function startHandTracking() {
   });
 
   hands.onResults((results) => {
-    if (results.multiHandLandmarks) {
-      console.log("HAND DETECTED");
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      showDetected();
     }
   });
 
-  const camera = new Camera(videoElement, {
-  onFrame: async () => {
+  // 3️⃣ Kirim frame terus menerus (loop manual)
+  async function detect() {
     await hands.send({ image: videoElement });
-  },
-  width: 640,
-  height: 480,
-  facingMode: "environment" // 🔥 pakai kamera belakang
-});
+    requestAnimationFrame(detect);
+  }
 
-  camera.start();
+  detect();
 }
 
+// Tampilkan teks kalau detect
+function showDetected() {
+  if (!document.getElementById("detectedText")) {
+    const div = document.createElement("div");
+    div.id = "detectedText";
+    div.innerText = "HAND DETECTED";
+    div.style.position = "fixed";
+    div.style.top = "30px";
+    div.style.left = "30px";
+    div.style.color = "red";
+    div.style.fontSize = "22px";
+    div.style.zIndex = "9999";
+    document.body.appendChild(div);
+  }
+}
