@@ -1,27 +1,139 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AR Nail Art</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+  <title>Back Camera Hand Tracking</title>
 
+  <!-- MediaPipe -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial;
+      background: #ffe6f0;
+    }
+
+    .container {
+      position: relative;
+      display: inline-block;
+    }
+
+    video, canvas {
+      width: 95vw;
+      max-width: 500px;
+      border-radius: 15px;
+    }
+
+    canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    #status {
+      font-size: 20px;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #d1006c;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      margin-top: 20px;
+      border: none;
+      background: hotpink;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: deeppink;
+    }
+  </style>
+</head>
 <body>
 
-<button id="startBtn">START AR NAIL ART</button>
-<video id="video" autoplay playsinline></video>
-<div id="three-container"></div>
+  <h2>Hand Tracking - Back Camera</h2>
 
-<!-- THREE -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <button onclick="startCamera()">Start Back Camera</button>
 
-<!-- MEDIAPIPE -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <div class="container">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+  </div>
 
-<script src="script.js"></script>
+  <div id="status">Camera Off</div>
+
+<script>
+  const videoElement = document.getElementById('video');
+  const canvasElement = document.getElementById('canvas');
+  const canvasCtx = canvasElement.getContext('2d');
+  const statusText = document.getElementById('status');
+
+  const hands = new Hands({
+    locateFile: (file) => {
+      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+    }
+  });
+
+  hands.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
+  });
+
+  hands.onResults(results => {
+
+    canvasElement.width = videoElement.videoWidth;
+    canvasElement.height = videoElement.videoHeight;
+
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+    canvasCtx.drawImage(
+      results.image, 0, 0,
+      canvasElement.width,
+      canvasElement.height
+    );
+
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+
+      statusText.innerText = "Hand Detected ✋";
+
+      for (const landmarks of results.multiHandLandmarks) {
+        drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
+          { color: '#ff69b4', lineWidth: 3 });
+        drawLandmarks(canvasCtx, landmarks,
+          { color: '#ff1493', lineWidth: 2 });
+      }
+
+    } else {
+      statusText.innerText = "No Hand Detected";
+    }
+
+    canvasCtx.restore();
+  });
+
+  function startCamera() {
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480,
+      facingMode: "environment" // 🔥 BACK CAMERA
+    });
+
+    camera.start();
+    statusText.innerText = "Camera On (Back)";
+  }
+</script>
 
 </body>
 </html>
