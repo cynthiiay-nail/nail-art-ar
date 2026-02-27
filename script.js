@@ -1,15 +1,13 @@
 // ===============================
-// BASIC SETUP
+// DOM
 // ===============================
-
 const video = document.getElementById("video");
 const startBtn = document.getElementById("startBtn");
 const container = document.getElementById("three-container");
 
 // ===============================
-// THREE.JS
+// THREE.JS SETUP
 // ===============================
-
 const scene = new THREE.Scene();
 
 const camera3D = new THREE.PerspectiveCamera(
@@ -24,12 +22,13 @@ const renderer = new THREE.WebGLRenderer({
   alpha: true,
   antialias: true
 });
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 
 container.appendChild(renderer.domElement);
 
-// DEBUG CUBE (HARUS SELALU MUNCUL)
+// DEBUG CUBE (HARUS MUNCUL)
 const cube = new THREE.Mesh(
   new THREE.BoxGeometry(0.3, 0.3, 0.3),
   new THREE.MeshBasicMaterial({ color: 0xff0000 })
@@ -45,14 +44,16 @@ function animate() {
 animate();
 
 // ===============================
-// BUTTON + MEDIAPIPE
+// START BUTTON
 // ===============================
-
 startBtn.addEventListener("click", () => {
   startBtn.style.display = "none";
   startAR();
 });
 
+// ===============================
+// MEDIAPIPE HANDS
+// ===============================
 function startAR() {
   const hands = new Hands({
     locateFile: (file) =>
